@@ -1,0 +1,8 @@
+name: JCVaultListener
+main: com.java_craft.mc.JCVaultListener.JCVaultListener
+version: 2.0.3
+author: ${bukkit.author}
+website: http://www.java-craft.com/JCVaultListener
+description: JCVaultListener is a plugin version of VaultListener for receiving Votifier vote events and reward players with currency for voting on a server.
+depend: [Votifier]
+softdepend: [Vault]
