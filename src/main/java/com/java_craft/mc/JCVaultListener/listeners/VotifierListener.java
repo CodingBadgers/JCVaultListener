@@ -5,9 +5,13 @@ import com.java_craft.mc.JCVaultListener.config.ConfigurationSet;
 import com.java_craft.mc.JCVaultListener.model.VoteService;
 import com.vexsoftware.votifier.model.Vote;
 import com.vexsoftware.votifier.model.VotifierEvent;
+
+import java.util.HashMap;
 import java.util.logging.Logger;
+
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
+
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -23,6 +27,8 @@ public class VotifierListener
   private final JCVaultListener plugin;
   private ConfigurationSet cfg;
   private double paid = 0.0D;
+  
+  private HashMap<String, Long> m_antiSpamMap = new HashMap<String, Long>();
 
   private boolean debug = false;
 
@@ -53,8 +59,25 @@ public class VotifierListener
       this.cfg.dumpConfiguration();
     }
 
-    VoteService vs = this.cfg.getVoteService(vote.getServiceName());
-
+    final String serviceName = vote.getServiceName();
+    boolean broadcastMessage = true;
+    
+    if (m_antiSpamMap.containsKey(serviceName)) {
+    	long lastTime = m_antiSpamMap.get(serviceName);
+    	if (System.currentTimeMillis() - lastTime < this.cfg.getAntiSpamTimeMilliseconds()) {
+    		broadcastMessage = false;
+    	}
+    	else {
+    		m_antiSpamMap.remove(serviceName);
+    		m_antiSpamMap.put(serviceName, System.currentTimeMillis());
+    	}
+    }
+    else {
+    	m_antiSpamMap.put(serviceName, System.currentTimeMillis());
+    }
+    
+    VoteService vs = this.cfg.getVoteService(serviceName);
+    
     Economy econ = this.plugin.getEconomy();
 
     if (econ != null) {
@@ -88,7 +111,7 @@ public class VotifierListener
     else if (this.debug) {
       LOGGER.info("[DBG] No online player found for -> " + ign);
     }
-    if (this.cfg.getBroadcastFlag())
+    if (this.cfg.getBroadcastFlag() && broadcastMessage == true)
       broadcastMessage(vote, this.cfg.getBroadcastMsg());
     else if (this.debug)
       LOGGER.info("[DBG] Broadcast disabled. No broadcast message sent.");

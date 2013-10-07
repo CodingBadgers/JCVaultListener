@@ -27,6 +27,8 @@ public class ConfigurationSet
   private boolean debug = false;
 
   private boolean broadcastFlag = true;
+  
+  private long broadcastAntiSpamRate = 5000;
 
   private boolean checkPlayer = false;
 
@@ -96,6 +98,7 @@ public class ConfigurationSet
 
     this.debug = Boolean.parseBoolean(props.getProperty("debug", "false"));
     this.broadcastFlag = Boolean.parseBoolean(props.getProperty("broadcast", "true"));
+    this.broadcastAntiSpamRate = Long.parseLong(props.getProperty("antiSpamRate", "5000"));
     this.confirmMsg = props.getProperty("confirm_msg", this.confirmMsg);
     this.paymentMsg = props.getProperty("payment_msg", this.paymentMsg);
     this.broadcastMsg = props.getProperty("broadcast_msg", this.broadcastMsg);
@@ -141,6 +144,7 @@ public class ConfigurationSet
 
     this.debug = cfg.getBoolean("debug", this.debug);
     this.broadcastFlag = cfg.getBoolean("broadcastVote", this.broadcastFlag);
+    this.broadcastAntiSpamRate = cfg.getLong("antiSpamRate", this.broadcastAntiSpamRate);
     this.checkPlayer = cfg.getBoolean("checkPlayer", this.checkPlayer);
     this.confirmMsg = cfg.getString("messages/confirm", "Thanks {IGN}, for voting on {SERVICE}!");
     this.paymentMsg = cfg.getString("messages/payment", "{AMOUNT} has been added to your {ECONOMY} balance.");
@@ -211,6 +215,7 @@ public class ConfigurationSet
     }
     tmpl.replace("debug", new StringBuilder().append("").append(this.debug).toString());
     tmpl.replace("broadcastVote", new StringBuilder().append("").append(this.broadcastFlag).toString());
+    tmpl.replace("antiSpamRate", new StringBuilder().append("").append(this.broadcastAntiSpamRate).toString());
     tmpl.replace("checkPlayer", new StringBuilder().append("").append(this.checkPlayer).toString());
     tmpl.replace("messages/confirm", this.confirmMsg.replace("\n", "\\n"));
     tmpl.replace("messages/payment", this.paymentMsg.replace("\n", "\\n"));
@@ -281,6 +286,7 @@ public class ConfigurationSet
     LOGGER.info(new StringBuilder().append("[DBG] debug: ").append(this.debug).toString());
     LOGGER.info(new StringBuilder().append("[DBG] checkPlayer: ").append(this.checkPlayer).toString());
     LOGGER.info(new StringBuilder().append("[DBG] broadcastVote: ").append(this.broadcastFlag).toString());
+    LOGGER.info(new StringBuilder().append("[DBG] antiSpamRate: ").append(this.broadcastAntiSpamRate).toString());
     LOGGER.info("[DBG] messages:");
     LOGGER.info(new StringBuilder().append("[DBG]   confirm: ").append(this.confirmMsg).toString());
     LOGGER.info(new StringBuilder().append("[DBG]   payment: ").append(this.paymentMsg).toString());
@@ -291,5 +297,9 @@ public class ConfigurationSet
     LOGGER.info("[DBG] rewards:");
     for (VoteService vs : this.vsConfigs.values())
       vs.dumpConfiguration();
+  }
+
+  public long getAntiSpamTimeMilliseconds() {
+	  return broadcastAntiSpamRate;
   }
 }
